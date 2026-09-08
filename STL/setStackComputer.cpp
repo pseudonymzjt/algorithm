@@ -1,0 +1,51 @@
+/*
+ * A computer preserves an empty stack at first and supports computation as follows:
+ * PUSH: empty set into stack.
+ * DUP: copy the top-stack elem and push into stack.
+ * UNION: pop out two sets and push the union of them into stack.
+ * INTERSECT: pop out two sets and push the intersection of them into stack.
+ * ADD: pop out two sets, add the first-pop set into the second-pop set(as an elem) and push it into stack.
+*/
+#include <set>
+#include <vector>
+#include <map>
+#include <iostream>
+#include <stack>
+#include <algorithm>
+#include <string>
+using namespace std;
+
+typedef set<int> Set;
+map<Set, int> IDcache;
+vector<Set> Setcache;
+
+int ID(Set x) {
+	if(IDcache.count(x)) return IDcache[x];
+	Setcache.push_back(x);
+	return IDcache[x] = Setcache.size() - 1;
+}
+
+#define ALL(x) x.begin(), x.end()
+#define INS(x) inserter(x, x.begin())
+
+int main() {
+	stack<int> s;
+	int n;
+	cin >> n;
+	for(int i = 0; i < n; i++) {
+		string op;
+		cin >> op;
+		if(op[0] == 'P') s.push(ID(Set()));
+		else if(op[0] == 'D') s.push(s.top());
+		else {
+			Set x1 = Setcache[s.top()]; s.pop();
+			Set x2 = Setcache[s.top()]; s.pop();
+			Set x;
+			if(op[0] == 'U') set_union(ALL(x1), ALL(x2), INS(x));
+			if(op[0] == 'I') set_intersection(ALL(x1), ALL(x2), INS(x));
+			if(op[0] == 'A') {x = x2; x.insert(ID(x1));}
+			s.push(ID(x));
+		}
+	}
+	cout << Setcache[s.top()].size() << endl;
+}
